@@ -1,45 +1,25 @@
 const Invoice = require('../models/Invoice.model');
 
 exports.submitInvoice = async (req, res) => {
-  const {
-    companyName, address1, address2, city, state, zip, phone, client,
-    clientAddress1, clientAddress2, clientCity, clientState, clientZipCode, clientPhone,
-    dateIssued, dateDue, currency, invoiceNumber, referenceNumber, items, notes, terms,
-  } = req.body;
+  const invoiceData = req.body;
 
-  const itemsArray = JSON.parse(items);
+  // Convert items from string to array
+  invoiceData.items = JSON.parse(invoiceData.items);
 
-  const invoice = new Invoice({
-    companyName,
-    address1,
-    address2,
-    city,
-    state,
-    zip,
-    phone,
-    client,
-    clientAddress1,
-    clientAddress2,
-    clientCity,
-    clientState,
-    clientZipCode,
-    clientPhone,
-    dateIssued: new Date(dateIssued),
-    dateDue: new Date(dateDue),
-    currency,
-    invoiceNumber,
-    referenceNumber,
-    items: itemsArray,
-    notes,
-    terms,
-    file: req.file ? req.file.path : '',
-  });
+  // Convert date strings to Date objects
+  invoiceData.dateIssued = new Date(invoiceData.dateIssued);
+  invoiceData.dateDue = new Date(invoiceData.dateDue);
+
+  // Create a new invoice with the data
+  const invoice = new Invoice(invoiceData);
 
   try {
-    await invoice.save();
-    res.json({ message: 'Invoice submitted successfully' });
+    // Save the invoice to the database
+    const savedInvoice = await invoice.save();
+    res.json({ message: 'Invoice submitted successfully', invoice: savedInvoice });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Failed to submit invoice' });
   }
 };
+
