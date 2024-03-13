@@ -1,0 +1,222 @@
+// InvoiceForm.js
+import React from 'react';
+import { TextField, Button, Grid, Paper, Select, MenuItem, InputAdornment, Box } from '@mui/material';
+import { Formik, Field, Form, useFormikContext } from 'formik';
+import AttachmentIcon from '@mui/icons-material/Attachment';
+import ItemForm from './ItemForm';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
+import axios from 'axios';
+
+const FileUpload = ({ field, form, ...props }) => {
+  const { setFieldValue } = useFormikContext();
+
+  const handleChange = (event) => {
+    const file = event.currentTarget.files[0];
+    setFieldValue(field.name, file);
+    form.setFieldValue(field.name, file);
+  };
+
+  return (
+    <TextField
+      name={field.name}
+      type="file"
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+              <PhotoLibraryIcon fontSize="large" />
+            </Box>
+          </InputAdornment>
+        ),
+        onChange: handleChange,
+      }}
+      variant="outlined"
+      fullWidth
+      sx={{
+        width: '500px',
+        height: '350px',
+        justifyContent: 'left',
+        border: '2px solid black',
+        borderRadius: '2px',
+        marginTop: '75px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    />
+  );
+};
+
+const InvoiceForm = () => {
+  return (
+    <Formik
+      initialValues={{
+        companyName: '',
+        address1: '',
+        address2: '',
+        city: '',
+        state: '',
+        zip: '',
+        Phone: '',
+        client: '',
+        clientAddress1: '',
+        clientAddress2: '',
+        clientCity: '',
+        clientState: '',
+        clientZipCode: '',
+        clientPhone: '',
+        dateIssued: new Date(),
+        dateDue: new Date(),
+        currency: 'USD',
+        invoiceNumber: '',
+        referenceNumber: '',
+        file: null,
+        items: [],
+        notes: '',
+        terms: '',
+      }}
+      onSubmit={async (values, { setSubmitting }) => {
+        const formData = new FormData();
+        formData.append('file', values.file);
+        formData.append('companyName', values.companyName);
+        formData.append('address1', values.address1);
+        formData.append('address2', values.address2);
+        formData.append('city', values.city);
+        formData.append('state', values.state);
+        formData.append('zip', values.zip);
+        formData.append('phone', values.Phone);
+        formData.append('client', values.client);
+        formData.append('clientAddress1', values.clientAddress1);
+        formData.append('clientAddress2', values.clientAddress2);
+        formData.append('clientCity', values.clientCity);
+        formData.append('clientState', values.clientState);
+        formData.append('clientZipCode', values.clientZipCode);
+        formData.append('clientPhone', values.clientPhone);
+        formData.append('dateIssued', values.dateIssued.toISOString());
+        formData.append('dateDue', values.dateDue.toISOString());
+        formData.append('currency', values.currency);
+        formData.append('invoiceNumber', values.invoiceNumber);
+        formData.append('referenceNumber', values.referenceNumber);
+        formData.append('items', JSON.stringify(values.items));
+        formData.append('notes', values.notes);
+        formData.append('terms', values.terms);
+
+        try {
+          const response = await axios.post('http://localhost:3000/api/invoices/submit', formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
+          alert(response.data.message); // Display the success message
+        } catch (error) {
+          alert('Operation unsuccessful'); // Display the error message
+          console.error(error);
+        } finally {
+          setSubmitting(false);
+        }
+      }}
+    >
+      {({ isSubmitting, setFieldValue }) => (
+        <Form>
+          <Paper style={{ display: 'flex', flexDirection: 'column', padding: '1em' }}>
+            <Grid container spacing={2} alignItems="flex-start" justifyContent="space-between">
+              <Grid item xs={6}>
+                <Field name="file" component={FileUpload} />
+              </Grid>
+              <Grid item xs={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <h2>From</h2>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field as={TextField} name="companyName" label="Company/Name" fullWidth />
+                    <Field as={TextField} name="address1" label="Address 1" fullWidth />
+                    <Field as={TextField} name="address2" label="Address 2" fullWidth />
+                    <Field as={TextField} name="city" label="City" fullWidth />
+                    <Field as={TextField} name="state" label="State/Province" fullWidth />
+                    <Field as={TextField} name="zip" label="Zip/Postal Code" fullWidth />
+                    <Field as={TextField} name="Phone" label=" Phone" fullWidth />
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid container spacing={2} alignItems="flex-start">
+              <Grid item xs={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <h2>Billed To</h2>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field name="client" as={TextField} label="Type to select or add client" fullWidth />
+                    <Field name="clientAddress1" as={TextField} label="Address 1" fullWidth />
+                    <Field name="clientAddress2" as={TextField} label="Address 2" fullWidth />
+                    <Field name="clientCity" as={TextField} label="City" fullWidth />
+                    <Field name="clientState" as={TextField} label="State/Province" fullWidth />
+                    <Field name="clientZipCode" as={TextField} label="Zip/Postal Code" fullWidth />
+                    <Field name="clientPhone" as={TextField} label="Phone" fullWidth />
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <h2>Invoice Details</h2>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field name="dateIssued" as={TextField} label="Date Issued" fullWidth />
+                    <Field name="dateDue" as={TextField} label="Date Due" fullWidth />
+                    <Field name="currency" as={Select} label="Currency" fullWidth>
+                      <MenuItem value="USD">USD - United States Dollar</MenuItem>
+                      <MenuItem value="INR">INR - Indian Rupees</MenuItem>
+                    </Field>
+                    <Field name="invoiceNumber" as={TextField} label="Invoice Number" fullWidth />
+                    <Field name="referenceNumber" as={TextField} label="Reference #" fullWidth />
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <h2>Item Form</h2>
+              </Grid>
+              <Grid item xs={12}>
+                <ItemForm />
+              </Grid>
+              <Grid item xs={12}>
+                <Field as={TextField} name="notes" label="Notes" fullWidth multiline rows={4} />
+              </Grid>
+              <Grid item xs={12}>
+                <Field as={TextField} name="terms" label="Terms" fullWidth multiline rows={4} />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  name="file"
+                  type="file"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AttachmentIcon />
+                      </InputAdornment>
+                    ),
+                    onChange: (event) => {
+                      setFieldValue('file', event.currentTarget.files[0]);
+                    },
+                  }}
+                  variant="outlined"
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button variant="contained" color="primary" type="submit" disabled={isSubmitting}>
+                  Submit
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Form>
+      )}
+    </Formik>
+  );
+};
+
+export default InvoiceForm;
