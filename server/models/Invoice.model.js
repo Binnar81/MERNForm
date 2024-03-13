@@ -1,31 +1,34 @@
 const mongoose = require('mongoose');
 
 const invoiceSchema = new mongoose.Schema({
-  companyName: String,
-  address1: String,
+  companyName: { type: String, required: true },
+  address1: { type: String, required: true },
   address2: String,
-  city: String,
-  state: String,
-  zip: String,
-  phone: String,
-  client: String,
-  clientAddress1: String,
+  city: { type: String, required: true },
+  state: { type: String, required: true, maxlength: 2 },
+  zip: { type: String, required: true, maxlength: 5 },
+  phone: { type: String, required: true, maxlength: 15 },
+  client: { type: String, required: true },
+  clientAddress1: { type: String, required: true },
   clientAddress2: String,
-  clientCity: String,
-  clientState: String,
-  clientZipCode: String,
-  clientPhone: String,
-  dateIssued: Date,
-  dateDue: Date,
-  currency: String,
-  invoiceNumber: String,
+  clientCity: { type: String, required: true },
+  clientState: { type: String, required: true, maxlength: 2 },
+  clientZipCode: { type: String, required: true, maxlength: 5 },
+  clientPhone: { type: String, required: true, maxlength: 15 },
+  dateIssued: { type: Date, default: Date.now },
+  dateDue: { type: Date, required: true },
+  currency: { type: String, enum: ['USD', 'EUR', 'GBP'], required: true },
+  invoiceNumber: { type: String, required: true, unique: true },
   referenceNumber: String,
-  items: [{ itemName: String, itemDescription: String, rate: Number, qty: Number, lineTotal: Number }],
+  items: [
+    {
+      itemName: { type: String, required: true },
+      itemDescription: String,
+      rate: { type: Number, required: true },
+      qty: { type: Number, required: true },
+      lineTotal: { type: Number, required: true }
+    }
+  ],
   notes: String,
   terms: String,
-  file: String,
-});
-
-const Invoice = mongoose.model('Invoice', invoiceSchema);
-
-module.exports = Invoice;
+ 
